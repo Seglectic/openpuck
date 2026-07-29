@@ -1,3 +1,9 @@
+// ╭────────────────────────────────────────╮
+// │  OpenPuck RF Link                      │
+// │  Owns controller polling, decoding,    │
+// │  connection state, and link recovery.  │
+// ╰────────────────────────────────────────╯
+
 #include "rf_link.h"
 #include "radio.h"
 #include "bonds.h"
@@ -8,6 +14,7 @@
 #include "controllers.h"
 #include "status_led.h"
 #include "fault_diag.h"
+#include "retro_backend.h"
 #include "usb_mount.h" // modeSwitchReboot()
 #include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
@@ -700,7 +707,8 @@ uint8_t rfConnTx(uint8_t ch, uint8_t s1, const uint8_t *payload, uint8_t plen,
 					static uint8_t chCnt[NSLOT] = { 0, 0, 0,
 									0 };
 					uint8_t want = 0xFF;
-					if ((g_in[g_curSlot].buttons &
+					if (!retroBackendOwnsModeChords() &&
+					    (g_in[g_curSlot].buttons &
 					     CHORD_BACK4) == CHORD_BACK4) {
 						if (g_in[g_curSlot].buttons &
 						    TB_A)

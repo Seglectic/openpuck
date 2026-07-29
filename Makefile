@@ -68,7 +68,7 @@ UPLOAD = arduino-cli upload -b $(FQBN) -p "$(FLASH_PORT)" OpenPuck
 RP_USB_FLAGS = -DNRF52840_XXAA {build.flags.usb} -DCFG_TUD_TASK_QUEUE_SZ=$(CFG_TUD_TASK_QUEUE_SZ) -DCFG_TUD_VENDOR_TX_BUFSIZE=$(CFG_TUD_VENDOR_TX_BUFSIZE) $(EXTRA_FLAGS)
 RP_UPLOAD = arduino-cli upload -b $(FQBN) -p "$(FLASH_PORT)" ReversePuckFirmware
 
-.PHONY: help setup doctor test-retro ci format format-check check build build-recovery reversepuck reversepuck-flash reversepuck-deploy flash deploy
+.PHONY: help setup doctor test-retro ci format format-check check build build-snes build-recovery reversepuck reversepuck-flash reversepuck-deploy flash deploy
 
 help: ## List the supported developer tasks.
 	@awk 'BEGIN { FS = ":.*## " } /^[a-zA-Z0-9_-]+:.*## / { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
@@ -85,13 +85,20 @@ test-retro: ## Build and run host-native retro protocol tests.
 		OpenPuck/retro_snes.cpp tests/test_retro_snes.cpp \
 		-o $(TEST_RETRO_BIN)
 	$(TEST_RETRO_BIN)
+	CXX="$(CXX)" tests/test_retro_backend_config.sh
 
-ci: doctor check test-retro build ## Run the complete local software gate.
+ci: doctor check test-retro ## Run stock and SNES-selected local software gates.
+	$(MAKE) build BUILD_PATH=build/cache/ci-stock OUTPUT_DIR=build/ci-stock
+	$(MAKE) build-snes BUILD_PATH=build/cache/ci-snes OUTPUT_DIR=build/ci-snes
 
 ## Compile the firmware with the required USB flags baked in. Override CFG_TUD_HID / CFG_TUD_TASK_QUEUE_SZ /
 ## EXTRA_FLAGS / FQBN as make variables if needed.
 build:
 	arduino-cli compile -b $(FQBN) $(_PATH_FLAGS) --build-property "build.extra_flags=$(USB_EXTRA_FLAGS)" OpenPuck
+
+build-snes: ## Compile the SNES-selected nice!nano reference profile.
+	$(MAKE) build BUILD_PATH=$(BUILD_PATH) OUTPUT_DIR=$(OUTPUT_DIR) \
+		EXTRA_FLAGS="$(EXTRA_FLAGS) -DOPK_RETRO_BACKEND=1 -DOPK_RETRO_BOARD_NICENANO=1 -DOPK_RETRO_SLOT=0"
 
 ## One-time factory-reset recovery image (wipes persistent storage once on first boot). See §6 of the build doc.
 build-recovery:

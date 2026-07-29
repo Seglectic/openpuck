@@ -134,3 +134,31 @@ post-frame released/high behavior.
 
 Evidence level: host-tested only. No GPIO timing, fixture, logic-analyzer, or
 console test is implied.
+
+## Phase 3: optional backend seam
+
+Phase 3 added a default inline null backend, an SNES compile-time selection,
+slot and physical-pin validation, a signal-only nice!nano profile, lifecycle
+calls, and one mode-chord ownership guard.
+
+Integration edits are limited to:
+
+- initialization after config and bonds load;
+- one task call immediately after `rfLinkTask()`, so it observes the newest
+  decoded or stale-released `g_in`;
+- one guard at the existing back-four mode-switch decision.
+
+No `mode_*.cpp` file changed. The SNES profile does not configure GPIO until
+Phase 4, so console activity and chord ownership remain false.
+
+Verification:
+
+- compile-time selector/pin/slot negative tests: pass;
+- `make test-retro`: pass;
+- stock build: 187,184 bytes flash / 42,512 bytes RAM, unchanged;
+- SNES-selected build: 187,936 bytes flash / 42,512 bytes RAM;
+- SNES build profile: `P0.17` LATCH, `P0.20` CLOCK, `P0.22` DATA;
+- connected nice!nano: inventoried only, not flashed by Phase 3.
+
+Evidence level: host-tested and firmware-compiled. GPIO, electrical, fixture,
+logic-analyzer, and console behavior remain unverified.

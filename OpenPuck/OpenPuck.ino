@@ -1,4 +1,8 @@
-// OpenPuck.ino -- Steam Controller 2 ("Triton") puck reimplementation for an nRF52840.
+// ╭────────────────────────────────────────╮
+// │  OpenPuck Firmware Entry Point         │
+// │  Builds the USB presentation and pumps │
+// │  cooperative firmware subsystems.      │
+// ╰────────────────────────────────────────╯
 //
 // This firmware impersonates the Valve puck over USB, maintains puck-style bond slots, speaks the
 // reverse-engineered RF protocol to the controller, and re-enumerates into Steam, Xbox, Switch, PS5, or DS4
@@ -41,6 +45,7 @@ using namespace Adafruit_LittleFS_Namespace;
 #include "fault_diag.h"
 #include "fw_update.h"
 #include "usb_tx.h"
+#include "retro_backend.h"
 #include <stdio.h>
 
 #if CFG_TUD_HID < 4
@@ -142,6 +147,7 @@ void setup()
 #endif
 	loadCfg();
 	loadBonds();
+	retroBackendInit();
 	// Lizard (desktop) keyboard/mouse binding table. Custom remapping applies ONLY in pure
 	// MODE_LIZARD: there we install the user's saved/editable map. In every other mode the
 	// seamless lizard (Steam mode with Steam closed) uses the built-in DEFAULT map, so edits
@@ -369,6 +375,8 @@ void loop()
 	t = micros();
 	faultDiagSetStage(4);
 	rfLinkTask();
+	// Pull after RF so the backend sees the newest decoded or stale-released g_in.
+	retroBackendTask();
 	acc[4] += (uint32_t)(micros() - t);
 	t = micros();
 	faultDiagSetStage(5);
@@ -414,6 +422,7 @@ void loop()
 	rfDiagTask();
 	faultDiagSetStage(4);
 	rfLinkTask();
+	retroBackendTask();
 	faultDiagSetStage(5);
 	hapticTask();
 	faultDiagSetStage(6);

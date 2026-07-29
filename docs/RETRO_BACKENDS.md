@@ -11,8 +11,47 @@ RF decode -> g_in[slot] -> optional retro backend -> protocol adapter
 ```
 
 The stock build will use a null backend. Backend selection and lifecycle hooks
-are Phase 3 work; the Phase 2 SNES model is deliberately independent of
+are owned by `retro_backend.*`; the Phase 2 SNES model remains independent of
 Arduino, GPIO, USB, RF, allocation, and wall-clock time.
+
+## Build selection
+
+The compile-time selector accepts:
+
+- `OPK_RETRO_NONE` (default): inline no-op lifecycle calls;
+- `OPK_RETRO_SNES`: SNES pending-state preparation;
+- `OPK_RETRO_SLOT` (default 0): selected bond slot.
+
+The SNES selection requires explicit LATCH, CLOCK, and DATA physical nRF pin
+identities encoded as P0.00–P0.31 = 0–31 and P1.00–P1.15 = 32–47. Compilation
+rejects missing, duplicate, out-of-range, or board-reserved pins and an invalid
+slot.
+
+The reference nice!nano signal profile uses header pins common to the
+[published v1 and v2 layouts](https://nicekeyboards.com/docs/nice-nano/pinout-schematic/):
+
+| Function | Physical nRF pin | nice!nano label |
+| --- | --- | --- |
+| LATCH input | P0.17 | D2 |
+| CLOCK input | P0.20 | D3 |
+| DATA output | P0.22 | D4 |
+
+These are logical MCU-side assignments only. They do not authorize a direct
+connection to 5 V SNES signals. Level translation and backfeed protection remain
+mandatory.
+
+Build the selected profile with:
+
+```sh
+make build-snes \
+  BUILD_PATH=build/cache/snes \
+  OUTPUT_DIR=build/snes
+```
+
+The current Phase 3 backend prepares an RF-fresh logical word but intentionally
+does not configure GPIO or report console activity. Phase 4 will add the
+measured edge adapter; until then `retroBackendPollingActive()` remains false
+and OpenPuck mode chords are not suppressed.
 
 ## SNES logical frame
 
