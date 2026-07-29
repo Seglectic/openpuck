@@ -1,25 +1,49 @@
 # WebUSB on Linux
 
-By default, not every user is allowed to access raw USB devices like the OpenPuck. This can result in the configuration webpage showing "disconnected" after selecting the correct device. 
+Linux may deny the browser access to an OpenPuck USB device even after the
+device chooser succeeds. Chromium-family browsers report the underlying error
+in `chrome://device-log/`; an `Operation not permitted` error indicates that a
+narrow udev access rule may be required.
 
-You can check the error log by going to `chrome://device-log/`. (or `chromium://device-log`, `edge://device-log`, ... depending on your browser.)
+## Rule template
 
-If it shows "Failed to open /dev/bus/usb/xxx/xxx: Operation not permitted", you need to follow these instructions to give the current user raw access to Valve hardware (vendor ID 28de).
+Review `tools/udev/50-openpuck.rules` before installing it. The template:
 
+- matches exact VID/PID pairs used by OpenPuck modes with WebUSB;
+- includes exact Adafruit Feather nRF52840 IDs declared by the pinned core;
+- uses the active desktop session's `uaccess` ACL;
+- does not use `MODE="0666"` or grant access to every device from a vendor.
 
+OpenPuck deliberately impersonates existing controllers. A rule for an
+impersonated VID/PID also applies to a real controller with the same identity.
+Delete every application-mode line that is not needed on the host. The Valve
+`28de:1304` line is sufficient for the default Steam mode.
 
-## Instructions
+Install the reviewed file:
 
-As root, create the file `/etc/udev/rules.d/50-openpuck.rules` with the following content: 
-
+```sh
+sudo install -m 0644 tools/udev/50-openpuck.rules \
+  /etc/udev/rules.d/50-openpuck.rules
+sudo udevadm control --reload-rules
 ```
-SUBSYSTEM=="usb", ATTR{idVendor}=="28de", MODE="0664", GROUP="plugdev"
+
+Then unplug and reconnect the device. Some desktop/session configurations may
+require logging out and back in before `uaccess` ACLs appear.
+
+Inspect a connected device before expanding the template:
+
+```sh
+arduino-cli board list
+udevadm info --attribute-walk --name=/dev/ttyACM0
 ```
 
-This ensures that all members of the `plugdev` group can access all Valve hardware directly. 
+Do not add a broad vendor-only rule. Do not make all USB devices world
+writable.
 
-Then, run `sudo usermod -a -G plugdev $USER` to make sure your user is a member of that group, and then run `sudo udevadm control --reload-rules` (or reboot your machine) to enable the new rule. 
+Snap-packaged Chromium may also need:
 
-Only if you have chromium installed through Snap, you may also need to run `snap connect chromium:raw-usb` to give it direct USB access.
+```sh
+sudo snap connect chromium:raw-usb
+```
 
-Then just unplug and re-plug the OpenPuck and your browser should be able to connect to the OpenPuck while it's in Steam Controller mode.
+That sandbox permission is independent of udev.

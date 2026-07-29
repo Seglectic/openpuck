@@ -1,0 +1,14 @@
+#!/bin/sh
+# ╭──────────────────────────────────────╮
+# │  RetroPuck Local Environment         │
+# │  Runs a command with repository-     │
+# │  pinned tools ahead of global tools. │
+# ╰──────────────────────────────────────╯
+
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+export PATH="$ROOT/.tools/bin:$ROOT/.venv/bin:$PATH"
+cd "$ROOT"
+exec "$@"

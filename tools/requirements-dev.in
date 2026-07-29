@@ -1,0 +1,3 @@
+# Python tools required by the firmware build and format checks.
+adafruit-nrfutil==0.5.3.post16
+clang-format==18.1.8

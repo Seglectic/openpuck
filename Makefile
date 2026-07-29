@@ -1,4 +1,11 @@
-# OpenPuck developer convenience targets.
+# ╭───────────────────────────────────────╮
+# │  OpenPuck Developer Tasks             │
+# │  Owns reproducible checks, builds, and│
+# │  explicitly targeted deployment.      │
+# ╰───────────────────────────────────────╯
+
+LOCAL_TOOL_PATH := $(CURDIR)/.tools/bin:$(CURDIR)/.venv/bin
+export PATH := $(LOCAL_TOOL_PATH):$(PATH)
 
 # Pin to clang-format 18 to match CI; output differs between versions, so a
 # mismatch would make CI reject locally-formatted code. Resolve the binary in
@@ -59,7 +66,16 @@ UPLOAD = arduino-cli upload -b $(FQBN) -p "$(FLASH_PORT)" OpenPuck
 RP_USB_FLAGS = -DNRF52840_XXAA {build.flags.usb} -DCFG_TUD_TASK_QUEUE_SZ=$(CFG_TUD_TASK_QUEUE_SZ) -DCFG_TUD_VENDOR_TX_BUFSIZE=$(CFG_TUD_VENDOR_TX_BUFSIZE) $(EXTRA_FLAGS)
 RP_UPLOAD = arduino-cli upload -b $(FQBN) -p "$(FLASH_PORT)" ReversePuckFirmware
 
-.PHONY: format format-check check build build-recovery reversepuck reversepuck-flash reversepuck-deploy flash deploy
+.PHONY: help setup doctor format format-check check build build-recovery reversepuck reversepuck-flash reversepuck-deploy flash deploy
+
+help: ## List the supported developer tasks.
+	@awk 'BEGIN { FS = ":.*## " } /^[a-zA-Z0-9_-]+:.*## / { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+setup: ## Install the pinned toolchain into repo-local directories.
+	tools/bootstrap-dev.sh
+
+doctor: ## Audit tools, the configured board, and serial inventory without changes.
+	tools/run python3 tools/doctor.py
 
 ## Compile the firmware with the required USB flags baked in. Override CFG_TUD_HID / CFG_TUD_TASK_QUEUE_SZ /
 ## EXTRA_FLAGS / FQBN as make variables if needed.

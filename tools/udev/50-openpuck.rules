@@ -1,0 +1,22 @@
+# ╭────────────────────────────────────────╮
+# │  OpenPuck Linux Device Access          │
+# │  Grants the active session access only │
+# │  to explicit firmware and board IDs.   │
+# ╰────────────────────────────────────────╯
+
+# Default Steam mode and the ReversePuck controller.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="28de", ATTR{idProduct}=="1304", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="28de", ATTR{idProduct}=="1302", TAG+="uaccess"
+
+# Optional WebUSB-capable controller personalities. Remove unused identities.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="045e", ATTR{idProduct}=="028e", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0f0d", ATTR{idProduct}=="0092", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="057e", ATTR{idProduct}=="2009", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="054c", ATTR{idProduct}=="0ce6", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="054c", ATTR{idProduct}=="05c4", TAG+="uaccess"
+
+# Adafruit Feather nRF52840 application/bootloader IDs from core 1.7.0.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="8029", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="0029", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="002a", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="802a", TAG+="uaccess"
