@@ -112,3 +112,25 @@ physical pin and power contract rather than firmware source structure.
 
 At each phase boundary, fetch `upstream/main`, record its SHA, inspect conflict
 surfaces, and rerun the stock baseline before integrating upstream changes.
+
+## Phase 2: pure SNES model
+
+Phase 2 added `retro_snes.*`, host-native tests, and protocol documentation.
+The model has no Arduino, GPIO, USB, RF, allocation, or timing dependency.
+
+Verification:
+
+- `make test-retro`: pass;
+- deterministic randomized frames: 1,000,000;
+- `make check`: pass;
+- stock `make build`: pass;
+- stock flash/RAM after the addition: 187,184 / 42,512 bytes, unchanged from
+  baseline.
+
+The tests cover every mapped button, combinations, exact 16-bit order,
+active-low conversion, invalid mapping failure, link-loss release, opposing
+directions, latch snapshots, interrupted/incomplete frames, extra clocks, and
+post-frame released/high behavior.
+
+Evidence level: host-tested only. No GPIO timing, fixture, logic-analyzer, or
+console test is implied.
