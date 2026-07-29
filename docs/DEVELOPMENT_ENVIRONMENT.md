@@ -69,6 +69,8 @@ workspace during firmware phases.
 
 It never chooses a serial target. Missing firmware build dependencies cause a
 nonzero exit. Later-phase dependencies are warnings until their phase begins.
+On Linux it also reports stable `/dev/serial/by-id` links and metadata from
+already-mounted UF2 volumes. It does not mount, reset, or flash a device.
 
 ## Local Arduino configuration
 

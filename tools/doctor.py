@@ -176,19 +176,43 @@ def serial_inventory(executable: str | None) -> None:
     print("\nSerial inventory (informational; no target is selected):")
     if not executable:
         print("  unavailable until Arduino CLI is installed")
-        return
-    completed = run(
-        [executable, "--config-file", str(ARDUINO_CONFIG), "board", "list"]
-    )
-    if completed.returncode != 0:
-        print(f"  unable to enumerate: {completed.stdout.strip()}")
-        return
-    lines = completed.stdout.strip().splitlines()
-    if len(lines) <= 1:
-        print("  no serial boards detected")
-        return
-    for line in lines:
-        print(f"  {line}")
+    else:
+        completed = run(
+            [
+                executable,
+                "--config-file",
+                str(ARDUINO_CONFIG),
+                "board",
+                "list",
+            ]
+        )
+        if completed.returncode != 0:
+            print(f"  unable to enumerate: {completed.stdout.strip()}")
+        else:
+            lines = completed.stdout.strip().splitlines()
+            if len(lines) <= 1:
+                print("  no serial boards detected")
+            else:
+                for line in lines:
+                    print(f"  {line}")
+
+    by_id = Path("/dev/serial/by-id")
+    if by_id.is_dir():
+        for link in sorted(by_id.iterdir()):
+            print(f"  stable: {link} -> {link.resolve()}")
+
+    info_files = sorted(Path("/run/media").glob("*/*/INFO_UF2.TXT"))
+    for info_file in info_files:
+        try:
+            lines = info_file.read_text(
+                encoding="utf-8", errors="replace"
+            ).splitlines()
+        except OSError as error:
+            print(f"  UF2 metadata unreadable: {info_file}: {error}")
+            continue
+        print(f"  UF2 volume: {info_file.parent}")
+        for line in lines[:5]:
+            print(f"    {line}")
 
 
 def main() -> int:

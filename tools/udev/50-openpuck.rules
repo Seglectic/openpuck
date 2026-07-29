@@ -20,3 +20,6 @@ SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idPro
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="0029", TAG+="uaccess"
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="002a", TAG+="uaccess"
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="802a", TAG+="uaccess"
+
+# nice!nano UF2 bootloader detected on the reference development module.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="239a", ATTR{idProduct}=="00b3", TAG+="uaccess"

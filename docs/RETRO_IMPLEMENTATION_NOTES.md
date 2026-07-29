@@ -65,6 +65,30 @@ Artifacts:
 
 No hardware or serial target was present, selected, or flashed.
 
+## Detected development module
+
+On `2026-07-29`, a connected module enumerated with:
+
+- USB identity: `239a:00b3 Nice Keyboards nice!nano`;
+- USB serial: `5AF0F8863FE97BF6`;
+- serial node: `/dev/ttyACM0`;
+- stable serial link:
+  `/dev/serial/by-id/usb-Nice_Keyboards_nice_nano_5AF0F8863FE97BF6-if00`;
+- UF2 volume label: `NICENANO`;
+- UF2 model: `nice!nano`;
+- UF2 board ID: `nRF52840-nicenano`;
+- bootloader: UF2 0.6.0, built `2021-06-19`;
+- SoftDevice: S140 6.1.1.
+
+The device was in bootloader mode and exposed CDC, mass storage, and
+`CURRENT.UF2`. Its nice!nano hardware revision is not encoded in the USB or UF2
+metadata and remains unverified. The Adafruit core does not provide a
+nice!nano-specific FQBN, so the existing Feather FQBN is still the compile
+baseline rather than evidence of pin-level equivalence.
+
+The device was inventoried and its metadata read. It was not selected for an
+upload and was not flashed.
+
 ## Integration strategy
 
 Retro output is a build-selected backend, not a USB personality. The stock
